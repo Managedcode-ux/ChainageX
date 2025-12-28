@@ -1,0 +1,93 @@
+from pydantic import BaseModel, Field, field_validator, computed_field
+from typing import Optional
+from datetime import datetime, timezone
+
+
+class DieselReceivedCreateSchema(BaseModel):
+    project_name: str = Field(..., min_length=1)
+    purchase_invoice: str = Field(..., min_length=1)
+    quantity_liters: float = Field(..., gt=0)
+    price_per_liter: float = Field(..., gt=0)
+    received_date_time: datetime
+    entry_by: str
+
+    @field_validator("quantity_liters", mode="before")
+    @classmethod
+    def parse_quantity_liters(cls, v):
+        return float(v)
+
+    @field_validator("price_per_liter", mode="before")
+    @classmethod
+    def parse_price(cls, v):
+        return float(v)
+
+    # converting string time into timezone type
+    @field_validator("received_date_time", mode="before")
+    @classmethod
+    def parse_received_date_time(cls, value):
+        if isinstance(value, datetime):
+            return value.astimezone(timezone.utc)
+
+        try:
+            parsed = datetime.strptime(value, "%d-%b-%Y %I:%M %p")
+            return parsed.replace(tzinfo=timezone.utc)
+        except Exception:
+            raise ValueError(
+                "received_date_time must be in format 'DD-MMM-YYYY HH:MM AM/PM'"
+            )
+
+    # adding a new field total_price
+    @computed_field
+    @property
+    def total_price(self) -> float:
+        """
+        Total price = total_quantity * price_per_liter
+        """
+        return round(self.quantity_liters * self.price_per_liter, 2)
+
+    class Config:
+        orm_mode = True
+
+
+class DieselIssuedCreateSchema(BaseModel):
+    project_name: str = Field(..., min_length=1)
+    issued_to: str = Field(..., min_length=1)
+    issued_by: str = Field(..., min_length=1)
+    quantity_liters: float = Field(..., gt=0)
+    issued_date_time: datetime
+    price_per_liter: float = Field(..., gt=0)
+
+    @field_validator("price_per_liter", mode="before")
+    @classmethod
+    def parse_price(cls, v):
+        return float(v)
+
+    @field_validator("quantity_liters", mode="before")
+    @property
+    def parse_quantity(cls, v):
+        return float(v)
+
+    @field_validator("issued_date_time", mode="before")
+    @property
+    def parse_received_date_time(cls, value):
+        if isinstance(value, datetime):
+            return value.astimezone(timezone.utc)
+
+        try:
+            parsed = datetime.strptime(value, "%d-%b-%Y %I:%M %p")
+            return parsed.replace(tzinfo=timezone.utc)
+        except Exception:
+            raise ValueError(
+                "received_date_time must be in format 'DD-MMM-YYYY HH:MM AM/PM'"
+            )
+
+    @computed_field
+    @property
+    def total_price(self) -> float:
+        """
+        Total price = total_quantity * price_per_liter
+        """
+        return round(self.quantity_liters * self.price_per_liter, 2)
+
+    class Config:
+        orm_mode = True
