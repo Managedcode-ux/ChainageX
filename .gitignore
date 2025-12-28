@@ -209,4 +209,4 @@ __marimo__/
 ./data/*
 
 /data/chainagex.db
-/app/tests/
+/tests
