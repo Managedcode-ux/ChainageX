@@ -16,12 +16,3 @@ app.include_router(issued_router.router,prefix='/api')
 @app.get("/")
 async def root():
     return {"Hello": "World"}
-
-
-
-#
-# @app.post("/zoho/webhook")
-# async def zoho_webhook(request: Request):
-#     data = await request.json()
-#     print("Webhook received ==> \n",data)
-#     return {"status": "ok"}
