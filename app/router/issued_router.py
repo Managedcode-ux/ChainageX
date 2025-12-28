@@ -4,13 +4,13 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from app.database.dbConfig import get_db
 from app.schemas.diesel_schema import DieselIssuedCreateSchema
-from app.database.models.diesel_model import insertInto_DieselIssuedTable
+from app.controller.diesel_controller import create_diesel_issued_entry
 
 router = APIRouter(prefix="/issued", tags=["Assets Issued"])
 
-@router.post("/issued")
+@router.post("/diesel")
 async def add_diesel_entry(data:DieselIssuedCreateSchema,db:Session=Depends(get_db)):
     try:
-        insertInto_DieselIssuedTable()
+        return await create_diesel_issued_entry(db,data)
     except SQLAlchemyError as e:
         raise HTTPException(500, "Database error")

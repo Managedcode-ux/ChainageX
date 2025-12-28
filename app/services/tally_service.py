@@ -115,14 +115,14 @@ def tallyVoucher_DieselIssued(payload):
                 <ALLLEDGERENTRIES.LIST>
                   <LEDGERNAME>Diesel Issued</LEDGERNAME>
                   <ISDEEMEDPOSITIVE>Yes</ISDEEMEDPOSITIVE>
-                  <AMOUNT>-{payload.amount}</AMOUNT>
+                  <AMOUNT>-{payload.total_price}</AMOUNT>
                 </ALLLEDGERENTRIES.LIST>
     
                 <!-- Credit: Diesel Received -->
                 <ALLLEDGERENTRIES.LIST>
                   <LEDGERNAME>Diesel Received</LEDGERNAME>
                   <ISDEEMEDPOSITIVE>No</ISDEEMEDPOSITIVE>
-                  <AMOUNT>{payload.amount}</AMOUNT>
+                  <AMOUNT>{payload.total_price}</AMOUNT>
                 </ALLLEDGERENTRIES.LIST>
     
               </VOUCHER>

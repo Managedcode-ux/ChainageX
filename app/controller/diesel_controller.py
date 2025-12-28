@@ -5,7 +5,7 @@ from sqlalchemy.util import await_only
 from app.database.models.diesel_model import DieselReceived, DieselIssued, insertInto_DieselReceivedTable, \
     insertInto_DieselIssuedTable
 from app.schemas.diesel_schema import DieselReceivedCreateSchema
-from app.services.tally_service import tallyVoucher_DieselReceived
+from app.services.tally_service import tallyVoucher_DieselReceived, tallyVoucher_DieselIssued
 from app.schemas.diesel_schema import DieselIssuedCreateSchema
 
 
@@ -30,11 +30,12 @@ async def create_diesel_issued_entry(db: Session, payload: DieselIssuedCreateSch
         project_name=payload.project_name,
         issued_to=payload.issued_to,
         issued_by=payload.issued_by,
-        quantity=payload.quantity_liters,
-        issue_date_and_time=payload.issued_date_time,
+        quantity=payload.quantity,
+        issue_date_and_time=payload.issue_date_time,
         price_per_unit=payload.price_per_liter,
         total_price=payload.total_price,
     )
 
     insertInto_DieselIssuedTable(db, entry_data)
+    tallyVoucher_DieselIssued(payload)
     return entry_data

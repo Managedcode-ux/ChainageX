@@ -53,8 +53,8 @@ class DieselIssuedCreateSchema(BaseModel):
     project_name: str = Field(..., min_length=1)
     issued_to: str = Field(..., min_length=1)
     issued_by: str = Field(..., min_length=1)
-    quantity_liters: float = Field(..., gt=0)
-    issued_date_time: datetime
+    quantity: float = Field(..., gt=0)
+    issue_date_time: datetime
     price_per_liter: float = Field(..., gt=0)
 
     @field_validator("price_per_liter", mode="before")
@@ -62,13 +62,13 @@ class DieselIssuedCreateSchema(BaseModel):
     def parse_price(cls, v):
         return float(v)
 
-    @field_validator("quantity_liters", mode="before")
-    @property
+    @field_validator("quantity", mode="before")
+    @classmethod
     def parse_quantity(cls, v):
         return float(v)
 
-    @field_validator("issued_date_time", mode="before")
-    @property
+    @field_validator("issue_date_time", mode="before")
+    @classmethod
     def parse_received_date_time(cls, value):
         if isinstance(value, datetime):
             return value.astimezone(timezone.utc)
@@ -87,7 +87,7 @@ class DieselIssuedCreateSchema(BaseModel):
         """
         Total price = total_quantity * price_per_liter
         """
-        return round(self.quantity_liters * self.price_per_liter, 2)
+        return round(self.quantity * self.price_per_liter, 2)
 
     class Config:
         orm_mode = True
