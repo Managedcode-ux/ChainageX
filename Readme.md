@@ -114,3 +114,6 @@ The form should look like
 7. Save the webhook
 8. Make sure python,ngrok and tally  are running locally
 9. Open form add data and submit and the data should be reflected in DB and tally
+
+## Architecture 
+![img.png](./readme_assets/Architecture.png)
