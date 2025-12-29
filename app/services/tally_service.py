@@ -1,7 +1,7 @@
 import requests
 from datetime import datetime
 from app.app_config.setting import get_settings
-from app.schemas.diesel_schema import DieselReceivedCreateSchema
+from app.schemas.diesel_schema import RequestSchema_DieselReceived_Create
 
 settings = get_settings()
 
@@ -10,7 +10,7 @@ TALLY_URL = settings.TALLY_URL
 voucher_date = "20250401"
 
 
-def tallyVoucher_DieselReceived(payload: DieselReceivedCreateSchema):
+def tallyVoucher_DieselReceived(payload: RequestSchema_DieselReceived_Create):
     """
     Sends a Purchase Voucher  to Tally for Diesel Received
     """
