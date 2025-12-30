@@ -1,6 +1,6 @@
-from pydantic import BaseModel, Field, field_validator, computed_field
-from typing import Optional
 from datetime import datetime, timezone
+
+from pydantic import BaseModel, Field, field_validator, computed_field
 
 
 class RequestSchema_DieselReceived_Create(BaseModel):
@@ -48,6 +48,11 @@ class RequestSchema_DieselReceived_Create(BaseModel):
     class Config:
         from_attributes = True
 
+
+class RequestSchema_DieselReceived_Read(BaseModel):
+    id: str = Field(..., min_length=1)
+
+
 class ResponseSchema_DieselReceived_Create(BaseModel):
     id: int
     invoice_id: str
@@ -61,6 +66,7 @@ class ResponseSchema_DieselReceived_Create(BaseModel):
 
     class Config:
         from_attributes = True
+
 
 class RequestSchema_DieselIssued_Create(BaseModel):
     project_name: str = Field(..., min_length=1)

@@ -1,8 +1,10 @@
-from sqlalchemy import Column, Integer, String, DateTime, Float
-from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime, timezone
-from app.database.dbConfig import Base
+
+from sqlalchemy import Column, Integer, String, DateTime, Float, select
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
+
+from app.database.dbConfig import Base
 
 
 class DieselReceived(Base):
@@ -57,22 +59,36 @@ class DieselIssued(Base):
             f"issue_date_and_time='{self.issue_date_and_time}'>"
         )
 
+
 def insertInto_DieselReceivedTable(db: Session, entry_data: DieselReceived):
     try:
         db.add(entry_data)
         db.commit()
         db.refresh(entry_data)
     except SQLAlchemyError as e:
-        print("ERROR IN insertInto_DieselReceivedTable ==>",e)
+        print("ERROR IN insertInto_DieselReceivedTable ==>", e)
         db.rollback()
         raise
 
-def insertInto_DieselIssuedTable(db:Session, entry_data: DieselIssued):
+
+def fetchFrom_DieselReceived(db: Session, id: str) -> DieselReceived | None:
+    query = select(DieselReceived).where(DieselReceived.id == int(id))
+    record = db.execute(query).scalar_one_or_none()
+    return record
+
+
+def fetchAllFrom_DieselReceived(db: Session) -> list[DieselReceived] | None:
+    query = select(DieselReceived)
+    records = db.execute(query).scalars().all()
+    return records
+
+
+def insertInto_DieselIssuedTable(db: Session, entry_data: DieselIssued):
     try:
         db.add(entry_data)
         db.commit()
         db.refresh(entry_data)
     except SQLAlchemyError as e:
-        print("ERROR IN insertInto_DieselIssuedTable ==>",e)
+        print("ERROR IN insertInto_DieselIssuedTable ==>", e)
         db.rollback()
         raise

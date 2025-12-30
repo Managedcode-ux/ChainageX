@@ -1,11 +1,11 @@
 from sqlalchemy.orm import Session
 
 from app.database.models.diesel_model import DieselReceived, DieselIssued, insertInto_DieselReceivedTable, \
-    insertInto_DieselIssuedTable
+    insertInto_DieselIssuedTable,fetchFrom_DieselReceived,fetchAllFrom_DieselReceived
 from app.exceptions.external import ExternalServiceError
 from app.schemas.diesel_schema import RequestSchema_DieselReceived_Create
-from app.services.tally_service import tallyVoucher_DieselReceived, tallyVoucher_DieselIssued
 from app.schemas.diesel_schema import RequestSchema_DieselIssued_Create
+from app.services.tally_service import tallyVoucher_DieselReceived, tallyVoucher_DieselIssued
 from app.app_config.logging_config import get_logger
 
 logger = get_logger()
@@ -32,6 +32,13 @@ async def create_diesel_received_entry(db: Session, payload: RequestSchema_Diese
         )
     return entry_data
 
+async def get_diesel_received_entry(db:Session,id:str) -> DieselReceived | None:
+    fetched_record = fetchFrom_DieselReceived(db,id)
+    return fetched_record
+
+async def get_all_diesel_received_entries(db:Session) -> list[DieselReceived] | None:
+    fetched_records  = fetchAllFrom_DieselReceived(db)
+    return fetched_records
 
 async def create_diesel_issued_entry(db: Session, payload: RequestSchema_DieselIssued_Create) -> DieselIssued:
     entry_data = DieselIssued(
@@ -53,3 +60,4 @@ async def create_diesel_issued_entry(db: Session, payload: RequestSchema_DieselI
             e,
         )
     return entry_data
+
