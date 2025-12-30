@@ -1,7 +1,10 @@
+from asyncio import timeout
+
 import requests
-from datetime import datetime
+
 from app.app_config.setting import get_settings
-from app.schemas.diesel_schema import DieselReceivedCreateSchema
+from app.exceptions.external import ExternalServiceError
+from app.schemas.diesel_schema import RequestSchema_DieselReceived_Create
 
 settings = get_settings()
 
@@ -10,7 +13,7 @@ TALLY_URL = settings.TALLY_URL
 voucher_date = "20250401"
 
 
-def tallyVoucher_DieselReceived(payload: DieselReceivedCreateSchema):
+def tallyVoucher_DieselReceived(payload: RequestSchema_DieselReceived_Create):
     """
     Sends a Purchase Voucher  to Tally for Diesel Received
     """
@@ -71,15 +74,14 @@ def tallyVoucher_DieselReceived(payload: DieselReceivedCreateSchema):
         "Content-Type": "text/xml",
     }
 
-    response = requests.post(TALLY_URL, data=xml_payload, headers=header)
-
-    if response.status_code != 200:
-        raise Exception("Failed to connect to Tally")
-
-    if "<CREATED>1</CREATED>" not in response.text:
-        raise Exception(f"Tally error: {response.text}")
-
-    return True
+    try:
+        response = requests.post(TALLY_URL, data=xml_payload, headers=header,timeout=10)
+        response.raise_for_status()
+        if "<CREATED>1</CREATED>" not in response.text:
+            raise ExternalServiceError("Tally rejected diesel received voucher")
+        return True
+    except requests.exceptions.RequestException as e:
+        raise ExternalServiceError("Failed to communicate with Tally") from e
 
 
 def tallyVoucher_DieselIssued(payload):
@@ -133,10 +135,14 @@ def tallyVoucher_DieselIssued(payload):
     </ENVELOPE>
     """
 
-    header = {"Content-Type":"application/xml"}
+    header = {"Content-Type": "application/xml"}
 
-    response = requests.post(TALLY_URL, data=xml_payload, headers=header)
-    if response.status_code != 200:
-        raise Exception("Failed to connect to Tally")
+    try:
+        response = requests.post(TALLY_URL, data=xml_payload, headers=header,timeout=10)
+        response.raise_for_status()
+        if "<CREATED>1</CREATED>" not in response.text:
+            raise ExternalServiceError("Tally rejected diesel issued voucher")
+        return True
+    except requests.exceptions.RequestException as e:
+        raise ExternalServiceError("Failed to communicate with Tally") from e
 
-    return True

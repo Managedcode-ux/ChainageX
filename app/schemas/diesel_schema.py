@@ -3,7 +3,7 @@ from typing import Optional
 from datetime import datetime, timezone
 
 
-class DieselReceivedCreateSchema(BaseModel):
+class RequestSchema_DieselReceived_Create(BaseModel):
     project_name: str = Field(..., min_length=1)
     purchase_invoice: str = Field(..., min_length=1)
     quantity_liters: float = Field(..., gt=0)
@@ -46,10 +46,23 @@ class DieselReceivedCreateSchema(BaseModel):
         return round(self.quantity_liters * self.price_per_liter, 2)
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
+class ResponseSchema_DieselReceived_Create(BaseModel):
+    id: int
+    invoice_id: str
+    entry_by: str
+    received_date_and_time: datetime
+    price_per_unit: float
+    total_price: float
+    quantity: float
+    project_name: str
+    created_at: datetime
 
-class DieselIssuedCreateSchema(BaseModel):
+    class Config:
+        from_attributes = True
+
+class RequestSchema_DieselIssued_Create(BaseModel):
     project_name: str = Field(..., min_length=1)
     issued_to: str = Field(..., min_length=1)
     issued_by: str = Field(..., min_length=1)
@@ -90,4 +103,19 @@ class DieselIssuedCreateSchema(BaseModel):
         return round(self.quantity * self.price_per_liter, 2)
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+
+
+class ResponseSchema_DieselIssued_Create(BaseModel):
+    id: int
+    project_name: str
+    issued_by: str
+    issued_to: str
+    quantity: float
+    issue_date_and_time: datetime
+    price_per_unit: float
+    total_price: float
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
