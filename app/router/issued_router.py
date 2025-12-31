@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.controller.diesel_controller import create_diesel_issued_entry, get_diesel_issued_entry, \
-    get_all_diesel_issued_entries
+    get_all_diesel_issued_entries, delete_diesel_issued_entry
 from app.database.dbConfig import get_db
 from app.schemas.api_schema import APIResponse
 from app.schemas.diesel_schema import RequestSchema_DieselIssued_Create, ResponseSchema_DieselIssued_Create
@@ -46,4 +46,13 @@ async def get_all_diesel_entries(db: Session = Depends(get_db)):
         message="Data found",
         status="success",
         data=response_data
+    )
+
+@router.delete("/diesel/{recordId}", response_model=APIResponse)
+async def delete_diesel_entry(recordId: str, db: Session = Depends(get_db)):
+    returned_data = await delete_diesel_issued_entry(recordId, db)
+    return APIResponse(
+        message=f"Data with the id {recordId} was deleted",
+        status="success",
+        data=returned_data
     )
