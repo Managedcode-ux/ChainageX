@@ -1,8 +1,15 @@
-from sqlalchemy import Column, Integer, String, DateTime, Float
-from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime, timezone
-from app.database.dbConfig import Base
+from typing import Sequence
+
+from sqlalchemy import Column, Integer, String, DateTime, Float, select
+from sqlalchemy.exc import SQLAlchemyError, NoResultFound
 from sqlalchemy.orm import Session
+
+from app.app_config.logging_config import get_logger
+from app.database.dbConfig import Base
+from app.schemas.diesel_schema import ResponseSchema_DieselReceived_Create, ResponseSchema_DieselIssued_Create
+
+logger = get_logger()
 
 
 class DieselReceived(Base):
@@ -57,22 +64,91 @@ class DieselIssued(Base):
             f"issue_date_and_time='{self.issue_date_and_time}'>"
         )
 
+
+# Note -  Database operations related to DieselReceived table
 def insertInto_DieselReceivedTable(db: Session, entry_data: DieselReceived):
     try:
         db.add(entry_data)
         db.commit()
         db.refresh(entry_data)
     except SQLAlchemyError as e:
-        print("ERROR IN insertInto_DieselReceivedTable ==>",e)
+        print("ERROR IN insertInto_DieselReceivedTable ==>", e)
         db.rollback()
         raise
 
-def insertInto_DieselIssuedTable(db:Session, entry_data: DieselIssued):
+
+def fetchFrom_DieselReceived(db: Session, recordId: str) -> DieselReceived | None:
+    query = select(DieselReceived).where(DieselReceived.id == int(recordId))
+    record = db.execute(query).scalar_one_or_none()
+    return record
+
+
+def fetchAllFrom_DieselReceived(db: Session) -> Sequence[DieselReceived] | None:
+    query = select(DieselReceived)
+    records = db.execute(query).scalars().all()
+    if not records:
+        return None
+    return records
+
+
+def deleteFrom_dieselReceived(recordId: str, db: Session) -> ResponseSchema_DieselReceived_Create:
+    try:
+        query = select(DieselReceived).where(DieselReceived.id == int(recordId))
+        record = db.execute(query).scalar_one()
+        data_copy = ResponseSchema_DieselReceived_Create.model_validate(record)
+        db.delete(record)
+        db.commit()
+        return data_copy
+    except NoResultFound:
+        raise
+    except SQLAlchemyError as e:
+        logger.exception(
+            "DB error during deleting data from DieselReceived table | id=%s",
+            recordId,
+        )
+        db.rollback()
+        raise
+
+
+# Note -  Database operations related to DieselReceived table
+def insertInto_DieselIssuedTable(db: Session, entry_data: DieselIssued):
     try:
         db.add(entry_data)
         db.commit()
         db.refresh(entry_data)
     except SQLAlchemyError as e:
-        print("ERROR IN insertInto_DieselIssuedTable ==>",e)
+        print("ERROR IN insertInto_DieselIssuedTable ==>", e)
+        db.rollback()
+        raise
+
+
+def fetchFrom_DieselIssued(db: Session, record_id: str) -> DieselIssued | None:
+    query = select(DieselIssued).where(DieselIssued.id == int(record_id))
+    record = db.execute(query).scalar_one_or_none()
+    return record
+
+
+def fetchAllFrom_DieselIssued(db: Session) -> Sequence[DieselIssued] | None:
+    query = select(DieselIssued)
+    records = db.execute(query).scalars().all()
+    if not records:
+        return None
+    return records
+
+def deleteFrom_dieselIssued(recordId: str, db: Session) -> ResponseSchema_DieselIssued_Create:
+    try:
+        query = select(DieselIssued).where(DieselIssued.id == int(recordId))
+        record = db.execute(query).scalar_one()
+        data_copy = ResponseSchema_DieselIssued_Create.model_validate(record)
+        db.delete(record)
+        db.commit()
+        return data_copy
+    except NoResultFound:
+        raise
+    except SQLAlchemyError as e:
+        logger.exception(
+            "DB error during deleting data from DieselIssued table | id=%s",
+            recordId,
+        )
         db.rollback()
         raise
