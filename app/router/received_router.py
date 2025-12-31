@@ -21,9 +21,9 @@ async def add_diesel_entry(data: RequestSchema_DieselReceived_Create, db: Sessio
     )
 
 
-@router.get("/diesel/{id}", response_model=APIResponse)
-async def get_diesel_entry(id: str, db: Session = Depends(get_db)):
-    returned_data = await get_diesel_received_entry(db, id)
+@router.get("/diesel/{recordId}", response_model=APIResponse)
+async def get_diesel_entry(record_id: str, db: Session = Depends(get_db)):
+    returned_data = await get_diesel_received_entry(db, record_id)
     if returned_data is None:
         raise HTTPException(404, "Data not found")
     response_data = ResponseSchema_DieselReceived_Create.model_validate(returned_data)

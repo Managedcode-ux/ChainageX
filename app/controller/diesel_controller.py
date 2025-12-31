@@ -1,15 +1,19 @@
+from sqlalchemy import Sequence
 from sqlalchemy.orm import Session
 
-from app.database.models.diesel_model import DieselReceived, DieselIssued, insertInto_DieselReceivedTable, \
-    insertInto_DieselIssuedTable,fetchFrom_DieselReceived,fetchAllFrom_DieselReceived
-from app.exceptions.external import ExternalServiceError
-from app.schemas.diesel_schema import RequestSchema_DieselReceived_Create
-from app.schemas.diesel_schema import RequestSchema_DieselIssued_Create
-from app.services.tally_service import tallyVoucher_DieselReceived, tallyVoucher_DieselIssued
 from app.app_config.logging_config import get_logger
+from app.database.models.diesel_model import DieselReceived, DieselIssued, insertInto_DieselReceivedTable, \
+    insertInto_DieselIssuedTable, fetchFrom_DieselReceived, fetchAllFrom_DieselReceived, fetchFrom_DieselIssued, \
+    fetchAllFrom_DieselIssued
+from app.exceptions.external import ExternalServiceError
+from app.schemas.diesel_schema import RequestSchema_DieselIssued_Create
+from app.schemas.diesel_schema import RequestSchema_DieselReceived_Create
+from app.services.tally_service import tallyVoucher_DieselReceived, tallyVoucher_DieselIssued
 
 logger = get_logger()
 
+
+# Note - Controllers related to diesel received
 async def create_diesel_received_entry(db: Session, payload: RequestSchema_DieselReceived_Create) -> DieselReceived:
     entry_data = DieselReceived(
         invoice_id=payload.purchase_invoice,
@@ -32,14 +36,18 @@ async def create_diesel_received_entry(db: Session, payload: RequestSchema_Diese
         )
     return entry_data
 
-async def get_diesel_received_entry(db:Session,id:str) -> DieselReceived | None:
-    fetched_record = fetchFrom_DieselReceived(db,id)
+
+async def get_diesel_received_entry(db: Session, recordIdid: str) -> DieselReceived | None:
+    fetched_record = fetchFrom_DieselReceived(db, recordIdid)
     return fetched_record
 
-async def get_all_diesel_received_entries(db:Session) -> list[DieselReceived] | None:
-    fetched_records  = fetchAllFrom_DieselReceived(db)
+
+async def get_all_diesel_received_entries(db: Session) -> Sequence[DieselReceived] | None:
+    fetched_records = fetchAllFrom_DieselReceived(db)
     return fetched_records
 
+
+# Note - Controllers related to diesel issued
 async def create_diesel_issued_entry(db: Session, payload: RequestSchema_DieselIssued_Create) -> DieselIssued:
     entry_data = DieselIssued(
         project_name=payload.project_name,
@@ -61,3 +69,12 @@ async def create_diesel_issued_entry(db: Session, payload: RequestSchema_DieselI
         )
     return entry_data
 
+
+async def get_diesel_issued_entry(db: Session, recordId: str) -> DieselIssued | None:
+    fetched_record = fetchFrom_DieselIssued(db, recordId)
+    return fetched_record
+
+
+async def get_all_diesel_issued_entries(db: Session) -> Sequence[DieselIssued] | None:
+    fetched_records = fetchAllFrom_DieselIssued(db)
+    return fetched_records

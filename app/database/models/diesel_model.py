@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from typing import Sequence
 
 from sqlalchemy import Column, Integer, String, DateTime, Float, select
 from sqlalchemy.exc import SQLAlchemyError
@@ -60,6 +61,7 @@ class DieselIssued(Base):
         )
 
 
+# Note -  Database operations related to DieselReceived table
 def insertInto_DieselReceivedTable(db: Session, entry_data: DieselReceived):
     try:
         db.add(entry_data)
@@ -71,18 +73,19 @@ def insertInto_DieselReceivedTable(db: Session, entry_data: DieselReceived):
         raise
 
 
-def fetchFrom_DieselReceived(db: Session, id: str) -> DieselReceived | None:
-    query = select(DieselReceived).where(DieselReceived.id == int(id))
+def fetchFrom_DieselReceived(db: Session, recordId: str) -> DieselReceived | None:
+    query = select(DieselReceived).where(DieselReceived.id == int(recordId))
     record = db.execute(query).scalar_one_or_none()
     return record
 
 
-def fetchAllFrom_DieselReceived(db: Session) -> list[DieselReceived] | None:
+def fetchAllFrom_DieselReceived(db: Session) -> Sequence[DieselReceived] | None:
     query = select(DieselReceived)
     records = db.execute(query).scalars().all()
     return records
 
 
+# Note -  Database operations related to DieselReceived table
 def insertInto_DieselIssuedTable(db: Session, entry_data: DieselIssued):
     try:
         db.add(entry_data)
@@ -92,3 +95,15 @@ def insertInto_DieselIssuedTable(db: Session, entry_data: DieselIssued):
         print("ERROR IN insertInto_DieselIssuedTable ==>", e)
         db.rollback()
         raise
+
+
+def fetchFrom_DieselIssued(db: Session, record_id: str) -> DieselIssued | None:
+    query = select(DieselIssued).where(DieselIssued.id == int(record_id))
+    record = db.execute(query).scalar_one_or_none()
+    return record
+
+
+def fetchAllFrom_DieselIssued(db: Session) -> Sequence[DieselIssued] | None:
+    query = select(DieselIssued)
+    records = db.execute(query).scalars().all()
+    return records
