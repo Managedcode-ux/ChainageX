@@ -47,6 +47,19 @@ class RequestSchema_DieselReceived_Create(BaseModel):
 
     class Config:
         from_attributes = True
+        extra = "forbid"
+
+
+class RequestSchema_DieselReceived_Update(BaseModel):
+    project_name: str | None = None
+    purchase_invoice: str | None = None
+    quantity_liters: float | None = None
+    price_per_liter: float | None = None
+    received_date_time: datetime | None = None
+    entry_by: str | None = None
+    class Config:
+        from_attributes = True
+        extra = "forbid"
 
 
 class RequestSchema_DieselReceived_Read(BaseModel):
@@ -110,6 +123,7 @@ class RequestSchema_DieselIssued_Create(BaseModel):
 
     class Config:
         from_attributes = True
+        extra = "forbid"
 
 
 class ResponseSchema_DieselIssued_Create(BaseModel):
