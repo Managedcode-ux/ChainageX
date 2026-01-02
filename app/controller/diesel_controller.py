@@ -5,10 +5,11 @@ from sqlalchemy.orm import Session
 from app.app_config.logging_config import get_logger
 from app.database.models.diesel_model import DieselReceived, DieselIssued, insertInto_DieselReceivedTable, \
     insertInto_DieselIssuedTable, fetchFrom_DieselReceived, fetchAllFrom_DieselReceived, fetchFrom_DieselIssued, \
-    fetchAllFrom_DieselIssued, deleteFrom_dieselReceived, deleteFrom_dieselIssued, updateTo_dieselReceived
+    fetchAllFrom_DieselIssued, deleteFrom_dieselReceived, deleteFrom_dieselIssued, updateTo_dieselReceived, \
+    updateTo_dieselIssued
 from app.exceptions.external import ExternalServiceError
 from app.schemas.diesel_schema import RequestSchema_DieselIssued_Create, ResponseSchema_DieselReceived_Create, \
-    RequestSchema_DieselReceived_Update
+    RequestSchema_DieselReceived_Update, RequestSchema_DieselIssued_Update
 from app.schemas.diesel_schema import RequestSchema_DieselReceived_Create
 from app.services.tally_service import tallyVoucher_DieselReceived, tallyVoucher_DieselIssued
 
@@ -59,7 +60,8 @@ async def delete_diesel_received_entry(recordId: str, db: Session) -> ResponseSc
         raise HTTPException(404, "Data not found")
 
 
-async def update_diesel_received_entry(recordId: str, db: Session, data:RequestSchema_DieselReceived_Update) -> DieselReceived:
+async def update_diesel_received_entry(recordId: str, db: Session,
+                                       data: RequestSchema_DieselReceived_Update) -> DieselReceived:
     try:
         updated_record = updateTo_dieselReceived(recordId, db, data)
         return updated_record
@@ -108,3 +110,10 @@ async def delete_diesel_issued_entry(recordId: str, db: Session):
         return deleted_record
     except NoResultFound:
         raise HTTPException(404, "Data not found")
+
+
+async def update_diesel_issued_entry(recordId: str, db: Session, data: RequestSchema_DieselIssued_Update):
+    updated_record = updateTo_dieselIssued(recordId, db, data)
+    if updated_record is None:
+        raise HTTPException(404, "Data not found")
+    return updated_record

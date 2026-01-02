@@ -51,12 +51,13 @@ class RequestSchema_DieselReceived_Create(BaseModel):
 
 
 class RequestSchema_DieselReceived_Update(BaseModel):
-    project_name: str | None = None
-    purchase_invoice: str | None = None
-    quantity_liters: float | None = None
-    price_per_liter: float | None = None
+    project_name: str | None = Field(None, min_length=1)
+    purchase_invoice: str | None = Field(None, min_length=1)
+    quantity_liters: float | None = Field(None, gt=0)
+    price_per_liter: float | None = Field(None, gt=0)
     received_date_time: datetime | None = None
-    entry_by: str | None = None
+    entry_by: str | None = Field(None, min_length=1)
+
     class Config:
         from_attributes = True
         extra = "forbid"
@@ -120,6 +121,19 @@ class RequestSchema_DieselIssued_Create(BaseModel):
         Total price = total_quantity * price_per_liter
         """
         return round(self.quantity * self.price_per_liter, 2)
+
+    class Config:
+        from_attributes = True
+        extra = "forbid"
+
+
+class RequestSchema_DieselIssued_Update(BaseModel):
+    project_name: str | None = Field(None, min_length=1)
+    issued_to: str | None = Field(None, min_length=1)
+    issued_by: str | None = Field(None, min_length=1)
+    quantity: float | None = Field(None, gt=0)
+    issue_date_time: datetime | None = None
+    price_per_liter: float | None = Field(None, gt=0)
 
     class Config:
         from_attributes = True

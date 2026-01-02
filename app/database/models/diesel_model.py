@@ -1,14 +1,14 @@
 from datetime import datetime, timezone
 from typing import Sequence
 
-from sqlalchemy import Column, Integer, String, DateTime, Float, select, update
+from sqlalchemy import Column, Integer, String, DateTime, Float, select
 from sqlalchemy.exc import SQLAlchemyError, NoResultFound
 from sqlalchemy.orm import Session
 
 from app.app_config.logging_config import get_logger
 from app.database.dbConfig import Base
 from app.schemas.diesel_schema import ResponseSchema_DieselReceived_Create, ResponseSchema_DieselIssued_Create, \
-    RequestSchema_DieselReceived_Update
+    RequestSchema_DieselReceived_Update, RequestSchema_DieselIssued_Update
 
 logger = get_logger()
 
@@ -127,8 +127,8 @@ def updateTo_dieselReceived(recordId: str, db: Session, data: RequestSchema_Dies
             "entry_by": "entry_by",
         }
 
-        for field,value in update_data.items():
-            setattr(record, FIELD_MAP[field],value)
+        for field, value in update_data.items():
+            setattr(record, FIELD_MAP[field], value)
 
         record.total_price = round(
             record.quantity * record.price_per_unit, 2
@@ -189,4 +189,41 @@ def deleteFrom_dieselIssued(recordId: str, db: Session) -> ResponseSchema_Diesel
             recordId,
         )
         db.rollback()
+        raise
+
+
+def updateTo_dieselIssued(recordId: str, db: Session, data: RequestSchema_DieselIssued_Update) -> DieselIssued | None:
+    try:
+        query = select(DieselIssued).where(DieselIssued.id == int(recordId))
+        record = db.execute(query).scalar_one_or_none()
+
+        if record is None:
+            return None
+
+        update_data = data.model_dump(exclude_unset=True)
+        FIELD_MAP = {
+            "project_name": "project_name",
+            "issued_to": "issued_to",
+            "issued_by": "issued_by",
+            "quantity": "quantity",
+            "issue_date_time": "issue_date_and_time",
+            "price_per_liter": "price_per_unit",
+        }
+
+        for field, value in update_data.items():
+            setattr(record, FIELD_MAP[field], value)
+
+        record.total_price = round(
+            record.quantity * record.price_per_unit, 2
+        )
+        db.commit()
+        db.refresh(record)
+        return record
+
+    except SQLAlchemyError as e:
+        db.rollback()
+        logger.exception(
+            "DB error during updating data in DieselReceived table | id=%s",
+            recordId,
+        )
         raise
