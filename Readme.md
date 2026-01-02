@@ -16,8 +16,14 @@
 4. Navigate to cloned project directory
 5. In the root of project run command `pipenv install`. This installs all the required dependencies to run the python
    application
-6. Now from the root of project run the command `pipenv run uvicorn app.main:app --port 8000` this starts the python
+6. Create a file in the root of the project named .env and add the following values to it
+   PROD_DATABASE_URL = "sqlite:///./data/chainagex.db"
+   TEST_DATABASE_URL = "sqlite:///./data/test.db"
+   TALLY_URL = "http://localhost:9000"
+7. Now from the root of project run the command `pipenv run uvicorn app.main:app --port 8000` this starts the python
    server.
+
+   NOTE - Before sending any request make sure Tally is running and the company is loaded.
 
 ### Ngrok
 
